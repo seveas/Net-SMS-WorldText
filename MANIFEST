@@ -1,0 +1,3 @@
+Makefile.PL
+README
+lib/Net/SMS/WorldText.pm

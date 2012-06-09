@@ -7,7 +7,7 @@ use Carp qw(confess);
 use LWP::UserAgent;
 use URI::Escape;
 
-our $VERSION = "1.0";
+our $VERSION = "1.1";
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -140,12 +140,14 @@ sub new {
 
 sub create {
     my ($class, $wt, $name, $srcaddr, $pin) = @_;
+    $name = substr($name, 0, 20);
     my $grpid = $wt->__request("groupcreate", name=>$name, srcaddr=>$srcaddr, pin=>$pin);
     return $class->new($wt, $grpid);
 }
 
 sub add {
     my ($self, $number, $name) = @_;
+    $name = substr($name, 0, 20);
     $self->{wt}->__request("groupadd", grpid=>$self->{grpid}, dstaddr=>$number, name=>$name);
 }
 
@@ -272,7 +274,9 @@ group id. You can find these id's in the World-Text web interface.
 
 my $group = create_group(name => "Testgroup", srcaddr => "SMSAlert", pin => "1234");
 
-Creates a new bulk send group and returns it.
+Creates a new bulk send group and returns it. Name should not be longer than 20
+characters and may not contain spaces, srcaddr can be any of the source
+addresses available to your account.
 
 =head1 GROUP METHODS
 
@@ -283,7 +287,8 @@ These groups can be managed and addressed with the following methods.
 
 $group->add("+15550123456", "Dennis Kaarsemaker");
 
-Adds a member to the group.
+Adds a member to the group. The name should not be longer than 20 characters
+and will be truncated.
 
 =head2 del
 
