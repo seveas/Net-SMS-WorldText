@@ -7,7 +7,7 @@ use Carp qw(confess);
 use LWP::UserAgent;
 use URI::Escape;
 
-our $VERSION = "1.1";
+our $VERSION = "1.2";
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -64,7 +64,7 @@ sub __request {
     }
     my $res = $self->{ua}->request($req);
     if(!$res->is_success) {
-        croak("HTTP request to WorldText failed: " . $req->status_line);
+        croak("HTTP request to WorldText failed: " . $res->status_line);
     }
     my $content = $res->content;
     $content =~ s/^\s*(.*?)\s*$/$1/s;
@@ -224,21 +224,26 @@ All methods below will croak upon any failure.
 
 =head2 new
 
-my $wt = new(user => "username", pass => "password" [, proxy => 1]);
+    my $wt = Net::SMS::WorldText->new(user => "username", pass => "password" [, proxyapi => 1]);
 
 Creates an object for you to use. Specify proxy => 1 if you cannot connect to
 port 1082 on sms.world-text.com, it will then use the proxy api ont he standard
 https port of www.world-text.com.
 
+If you need to use a proxy to access the world-text service, you can set it in
+the underlying LWP::Useragent object as follows:
+
+    $wt->{ua}->proxy(['http','https'], 'http://my.proxy.host:3128');
+
 =head2 ping
 
-$wt->ping;
+    $wt->ping;
 
 Checks whether you can connect.
 
 =head2 send
 
-$wt->send(message => "Hello, world", dest => "+15550123456" [, srcaddr => "SMSAlert"] [, multipart => 1] [, callback => "url"]);
+    $wt->send(message => "Hello, world", dest => "+15550123456" [, srcaddr => "SMSAlert"] [, multipart => 1] [, callback => "url"]);
 
 Send a message to one or more recipients. To send the message to more than one
 recipient, pass an arrayref as dest. srcaddr can be any source address assigned
@@ -253,26 +258,26 @@ balance left after sending it.
 
 =head2 credits
 
-my $credits = $wt->credits;
+    my $credits = $wt->credits;
 
 Returns your SMS credit balance.
 
 =head2 query
 
-my $result = $wt->query($msgid);
+    my $result = $wt->query($msgid);
 
 Returns the current status of your message.
 
 =head2 group
 
-my $group = $wt->group(1042);
+    my $group = $wt->group(1042);
 
 Returns a Net::SMS::WorldText::Group object that represents a group with that
 group id. You can find these id's in the World-Text web interface.
 
 =head2 create_group
 
-my $group = create_group(name => "Testgroup", srcaddr => "SMSAlert", pin => "1234");
+    my $group = create_group(name => "Testgroup", srcaddr => "SMSAlert", pin => "1234");
 
 Creates a new bulk send group and returns it. Name should not be longer than 20
 characters and may not contain spaces, srcaddr can be any of the source
@@ -285,44 +290,44 @@ These groups can be managed and addressed with the following methods.
 
 =head2 add
 
-$group->add("+15550123456", "Dennis Kaarsemaker");
+    $group->add("+15550123456", "Dennis Kaarsemaker");
 
 Adds a member to the group. The name should not be longer than 20 characters
 and will be truncated.
 
 =head2 del
 
-$group->del("+15550123456");
+    $group->del("+15550123456");
 
 Removes a member, only phonenumbers can be passed to this call.
 
 =head2 delall
 
-$group->delall;
+    $group->delall;
 
 Removes all members from the group.
 
 =head2 list
 
-$group->list;
+    $group->list;
 
 Returns all phonenumbers in the group.
 
 =head2 details
 
-$group->details;
+    $group->details;
 
 Like list, but returns a has mapping names to numbers.
 
 =head2 send
 
-$group->send("Hello, group!", [, srcaddr => "SMSAlert"] [, multipart => 1]);
+    $group->send("Hello, group!" [, srcaddr => "SMSAlert"] [, multipart => 1]);
 
 Sends a message to all members of the group. Returns the amount of sms'es sent.
 
 =head2 remove
 
-$group->remove;
+    $group->remove;
 
 Deletes the group from the World-Text system.
 
