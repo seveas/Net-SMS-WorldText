@@ -7,7 +7,7 @@ use Carp qw(confess);
 use LWP::UserAgent;
 use URI::Escape;
 
-our $VERSION = "1.2";
+our $VERSION = "1.3";
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -64,7 +64,7 @@ sub __request {
     }
     my $res = $self->{ua}->request($req);
     if(!$res->is_success) {
-        croak("HTTP request to WorldText failed: " . $res->status_line);
+        confess("HTTP request to WorldText failed: " . $res->status_line);
     }
     my $content = $res->content;
     $content =~ s/^\s*(.*?)\s*$/$1/s;
@@ -220,7 +220,7 @@ api on sms.world-text.com.
 
 =head1 METHODS
 
-All methods below will croak upon any failure.
+All methods below will confess upon any failure.
 
 =head2 new
 
